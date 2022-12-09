@@ -1,0 +1,119 @@
+// See https://aka.ms/new-console-template for more information
+
+using System.Text.RegularExpressions;
+
+string filename = Environment.CurrentDirectory + @".\day7\input.txt";
+var lines = File.ReadAllLines(filename);
+
+Console.WriteLine("------- Start ");
+
+//1021211 too low
+
+Dictionary<string, Nodo> tree = new Dictionary<string, Nodo>(); 
+
+tree.Add("0_/", new Nodo(""));
+
+Regex patCommand = new Regex(@"\$ (\w*)(.*)");
+Regex patDir = new Regex(@"dir (\w*)");
+Regex patFile = new Regex(@"^(\d+) (.*)");
+
+string activeDirectory = "/"; 
+int levelDirectory = 0;
+Stack<string> path = new(); 
+
+foreach (var l in lines) {
+    if (patCommand.IsMatch(l)) { 
+        var matches = patCommand.Matches(l);
+        string com = matches[0].Groups[1].Value;
+        string dir = ""; 
+        if (com.Equals("cd")) {
+            dir = matches[0].Groups[2].Value.Trim();
+            if (dir.Equals("/")) {
+                levelDirectory = 0;
+                activeDirectory = "0_/";
+            }
+            else if (dir.Equals("..")) {
+                activeDirectory = tree[activeDirectory].parent ?? "0_/";
+                levelDirectory = Math.Max(--levelDirectory, 0);
+            } else {
+                levelDirectory++;
+                activeDirectory = $"{levelDirectory}_{dir}";
+            }
+            Console.WriteLine($"> {com} {dir} currentDir: {activeDirectory} level {levelDirectory}");
+        } else 
+            Console.WriteLine($"> {com} {dir}");
+    }
+    else if (patDir.IsMatch(l)) {
+        string newdir = string.Format("{0}_{1}",levelDirectory+1,patDir.Matches(l)[0].Groups[1].Value);
+        if (!tree.ContainsKey(newdir))
+            tree.Add(newdir, new Nodo(activeDirectory));
+        Console.WriteLine($"dir {newdir}");
+    } 
+    
+    else if (patFile.IsMatch(l)) {
+        string filename = patFile.Matches(l)[0].Groups[2].Value;
+        long size = long.Parse(patFile.Matches(l)[0].Groups[1].Value);
+
+        Fichero fich = new Fichero(filename,size);
+        if (!tree[activeDirectory].files.Contains(fich)) {
+            tree[activeDirectory].files.Add(fich);
+            //cuando añadimos un fichero podemos incrementar el tamaño de todos los directorios de la jerarquía 
+            string aux = activeDirectory; 
+
+            while (!string.IsNullOrEmpty(tree[aux].parent)) {
+                tree[aux].totalsize += size;
+                Console.WriteLine($"incrementamos en {size} el dir {aux}");
+                
+                aux = tree[aux].parent;
+            }
+            Console.WriteLine($"incrementamos en {size} el dir {aux}");
+            tree["0_/"].totalsize+= size;
+            Console.WriteLine($"fichero: {filename} size: {size}");
+        } else {
+            Console.WriteLine("Fichero ya existía");
+            
+        }
+    }
+    
+}
+
+//Recorremos el arbol-diccionario para obtener el tamaño de los directorios 
+foreach (var key in tree.Keys) {
+    Console.WriteLine($"dir: {key} size: {tree[key].totalsize}");
+    
+}
+
+long result = tree.Values.Where(x=> x.totalsize <= 100_000).Sum(y=> y.totalsize);
+Console.WriteLine(result);
+
+Console.WriteLine("------- End ");
+
+
+// Estructuras de soporte 
+
+class Fichero {
+    public string filename;
+    public long size; 
+
+    public Fichero(string f, long s) {
+        this.filename = f; 
+        this.size = s;
+    }
+}
+class Nodo {
+    public List<Fichero> files; 
+    public string parent;
+    public long totalsize;
+
+    public Nodo(string p) {
+        files = new();
+        parent = p;
+        totalsize= 0;
+    }
+}
+
+
+
+
+
+

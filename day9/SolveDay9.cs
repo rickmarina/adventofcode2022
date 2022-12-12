@@ -22,6 +22,8 @@ namespace solutions
 
                 Console.WriteLine(ins);
 
+                //all cases can be refactored because the logic is the same excep the modification of first item that depends of
+                //orientation command (L, R, U , D)
                 if (move[0] == "R")
                 {
                     for (int x = 0; x < units; x++)
@@ -128,6 +130,8 @@ namespace solutions
 
                     }
                 }
+
+                
 
                 Console.WriteLine($"Total tail moves: " + totalTail(pos));
 

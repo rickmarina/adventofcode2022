@@ -146,7 +146,7 @@ class Monkey {
     public List<long> items {get;set;} = new(); 
 
     public string operation {get;set;} = "";
-    public string operationNumber {get;set;}
+    public string operationNumber {get;set;} = "0";
     public int divisible {get;set;}
 
     public int ifTrue {get;set;}

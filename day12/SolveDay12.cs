@@ -71,7 +71,7 @@ public class SolveDay12
 
         while (queue.Count > 0)
         {
-            Location u = null;
+            Location u = null!;
             foreach (var current in queue)
             {
                 if (u == null || dist[current] < dist[u.ToKey()])
@@ -81,12 +81,11 @@ public class SolveDay12
                 }
             }
 
-            if (u.ToString() == end.ToString())
-            {
-                Console.WriteLine("end reached");
-                break;
-            }
-
+                if (u.ToString() == end.ToString())
+                {
+                    Console.WriteLine("end reached");
+                    break;
+                }
             queue = new Queue<string>(queue.Where(x => x.ToString() != u.ToKey()));
 
             foreach (var v in getNeighbors(u.y, u.x, map))
@@ -131,7 +130,7 @@ public class SolveDay12
 
         while (queue.Count > 0)
         {
-            Location u = null;
+            Location u = null!;
             foreach (var current in queue)
             {
                 if (u == null || dist[current] < dist[u.ToKey()])
